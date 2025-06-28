@@ -27,12 +27,15 @@ function App() {
   const [phrase, setPhrase] = useState(randomItem(phrases));
   const [backgroundImg, setBackgroundImg] = useState(fondo_dia);
   const [darkMode, setDarkMode] = useState(false);
+const [showPhrase, setShowPhrase] = useState(false);
+
 
   /* const images = [fondo_dia,fondo_noche] */
 
   function handleChange() {
     setPhrase(randomItem(phrases));
     playSound();
+    setShowPhrase(true)
   }
 
   function handleDarkModeToggle() {
@@ -54,7 +57,9 @@ function App() {
 
       
 
-      <Card key={phrase.phrase} phrase={phrase} onChange={handleChange}></Card>
+      <Card key={phrase.phrase} phrase={phrase} onChange={handleChange}
+      showPhrase={showPhrase}
+      ></Card>
         
     </div>
   );
