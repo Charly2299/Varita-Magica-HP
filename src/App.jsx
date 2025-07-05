@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect,useDeferredValue } from "react";
 import "./App.scss";
 import phrases from "./data/phrases.json";
 import { randomItem } from "./lib/util";
@@ -13,6 +13,7 @@ import useSound from "use-sound";
 
 function App() {
   const [playSound] = useSound(wand_efect);
+  
  
 
   useEffect(() => {
@@ -29,6 +30,23 @@ function App() {
   const [darkMode, setDarkMode] = useState(false);
 const [showPhrase, setShowPhrase] = useState(false);
 
+const [pendingImg, setPendingImg] = useState(null);
+const [isImgLoading, setIsImgLoading] = useState(false);
+
+
+useEffect(() => {
+  if (!pendingImg) return;
+  const img = new window.Image();
+  img.src = pendingImg;
+  img.onload = () => {
+    setBackgroundImg(pendingImg);
+    setIsImgLoading(false);
+    setPendingImg(null);
+  };
+}, [pendingImg]);
+
+
+const deferredImg = useDeferredValue(backgroundImg);
 
   /* const images = [fondo_dia,fondo_noche] */
 
@@ -40,11 +58,14 @@ const [showPhrase, setShowPhrase] = useState(false);
 
   function handleDarkModeToggle() {
     setDarkMode((prev) => !prev);
-    setBackgroundImg((prev) => (prev === fondo_dia ? fondo_noche : fondo_dia));
+  
+    const nextImg = backgroundImg === fondo_dia ? fondo_noche : fondo_dia;
+  setPendingImg(nextImg);
+  setIsImgLoading(true);
   }
 
   const styles = {
-    backgroundImage: `url(${backgroundImg})`,
+    backgroundImage: `url(${deferredImg})`,
   };
 
   return (
