@@ -1,4 +1,4 @@
-import { useState, useEffect,useDeferredValue } from "react";
+import { useState, useEffect, useDeferredValue } from "react";
 import "./App.scss";
 import phrases from "./data/phrases.json";
 import { randomItem } from "./lib/util";
@@ -13,75 +13,85 @@ import useSound from "use-sound";
 
 function App() {
   const [playSound] = useSound(wand_efect);
-  
- 
 
   useEffect(() => {
- 
-
     swal("Da click a la varita mágica!", {
       buttons: false,
       timer: 2500,
     });
-  }, []); 
+  }, []);
 
   const [phrase, setPhrase] = useState(randomItem(phrases));
   const [backgroundImg, setBackgroundImg] = useState(fondo_dia);
   const [darkMode, setDarkMode] = useState(false);
-const [showPhrase, setShowPhrase] = useState(false);
+  const [showPhrase, setShowPhrase] = useState(false);
 
-const [pendingImg, setPendingImg] = useState(null);
-const [isImgLoading, setIsImgLoading] = useState(false);
+  const [pendingImg, setPendingImg] = useState(null);
+  const [isImgLoading, setIsImgLoading] = useState(true);
 
+  useEffect(() => {
+    if (!pendingImg) return;
+    const img = new window.Image();
+    img.src = pendingImg;
+    img.onload = () => {
+      setBackgroundImg(pendingImg);
+      setIsImgLoading(false);
+      setPendingImg(null);
+    };
+  }, [pendingImg]);
 
-useEffect(() => {
-  if (!pendingImg) return;
-  const img = new window.Image();
-  img.src = pendingImg;
-  img.onload = () => {
-    setBackgroundImg(pendingImg);
-    setIsImgLoading(false);
-    setPendingImg(null);
-  };
-}, [pendingImg]);
+  useEffect(() => {
+    const img = new window.Image();
+    img.src = fondo_dia;
+    img.onload = () => {
+      setIsImgLoading(false);
+    };
+  }, []);
 
-
-const deferredImg = useDeferredValue(backgroundImg);
+  const deferredImg = useDeferredValue(backgroundImg);
 
   /* const images = [fondo_dia,fondo_noche] */
 
   function handleChange() {
     setPhrase(randomItem(phrases));
     playSound();
-    setShowPhrase(true)
+    setShowPhrase(true);
   }
 
   function handleDarkModeToggle() {
     setDarkMode((prev) => !prev);
-  
+
     const nextImg = backgroundImg === fondo_dia ? fondo_noche : fondo_dia;
-  setPendingImg(nextImg);
-  setIsImgLoading(true);
+    setPendingImg(nextImg);
+    setIsImgLoading(true);
   }
 
-  const styles = {
+  /*   const styles = {
     backgroundImage: `url(${deferredImg})`,
-  };
+  }; */
 
   return (
-    <div className="container-total" style={styles}>
-
-      
-      <div className="darkmode-top-right">
-        <CheckDarkMode onToggle={handleDarkModeToggle} />
-      </div>
-
-      
-
-      <Card key={phrase.phrase} phrase={phrase} onChange={handleChange}
-      showPhrase={showPhrase}
-      ></Card>
-        
+    <div
+      className="container-total"
+      style={{ backgroundImage: `url(${deferredImg})` }}
+    >
+      {isImgLoading ? (
+        <div className="spinner-container">
+          <div className="spinner"></div>
+        </div>
+      ) : (
+        <>
+          <div className="darkmode-top-right">
+            <CheckDarkMode onToggle={handleDarkModeToggle} />
+          </div>
+          <Card
+            key={phrase.phrase}
+            phrase={phrase}
+            onChange={handleChange}
+            showPhrase={showPhrase}
+          />
+        </>
+      )}
     </div>
   );
 }
